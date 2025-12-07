@@ -30,29 +30,29 @@ const cleanTextForTTS = (text: string): string => {
 };
 
 const cleanTranscription = (text: any): string => {
-    if (!text) return "";
-    const str = String(text).trim();
-    // Check for common "null" variations including punctuation
-    const lower = str.toLowerCase().replace(/[.,!?;:]/g, '');
-    if (['null', 'nil', 'none', 'undefined', 'na', 'n/a', 'no audio'].includes(lower)) {
-        return "";
-    }
-    return str;
+  if (!text) return "";
+  const str = String(text).trim();
+  // Check for common "null" variations including punctuation
+  const lower = str.toLowerCase().replace(/[.,!?;:]/g, '');
+  if (['null', 'nil', 'none', 'undefined', 'na', 'n/a', 'no audio'].includes(lower)) {
+    return "";
+  }
+  return str;
 };
 
 // Timeout helper
 const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): Promise<T> => {
-    let timeoutId: any;
-    const timeoutPromise = new Promise<T>((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error(errorMessage)), ms);
-    });
-    return Promise.race([
-        promise.then(res => {
-            clearTimeout(timeoutId);
-            return res;
-        }),
-        timeoutPromise
-    ]);
+  let timeoutId: any;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(errorMessage)), ms);
+  });
+  return Promise.race([
+    promise.then(res => {
+      clearTimeout(timeoutId);
+      return res;
+    }),
+    timeoutPromise
+  ]);
 };
 
 export const analyzeMedicalInput = async (
@@ -63,7 +63,7 @@ export const analyzeMedicalInput = async (
   language: string = "English"
 ): Promise<AnalysisResult> => {
   if (!API_KEY) throw new Error("API Key is missing.");
-  
+
   const parts: any[] = [];
 
   // System Prompt
@@ -82,11 +82,11 @@ export const analyzeMedicalInput = async (
   // Construct dynamic instructions based on inputs
   let taskInstructions = `
   TASK:
-  1. Act as a professional doctor for educational purposes.
+  1. Act as a professional doctor. I know you are not but this is for learning purposes.
   `;
 
   if (history) {
-      taskInstructions += `
+    taskInstructions += `
       CONTEXT:
       You have already analyzed this image. Here is the conversation history:
       """
@@ -98,33 +98,35 @@ export const analyzeMedicalInput = async (
   }
 
   if (audioBlob) {
-      taskInstructions += `2. Transcribe the audio precisely in the 'transcription' field (keep transcription in original language).\n`;
-      taskInstructions += `3. If the audio contains a question, answer it.\n`;
+    taskInstructions += `2. Transcribe the audio precisely in the 'transcription' field (keep transcription in original language).\n`;
+    taskInstructions += `3. If the audio contains a question, answer it.\n`;
   }
-  
+
   if (userQuestion) {
-      taskInstructions += `4. The user has asked this specific question: "${userQuestion}". Answer this.\n`;
+    taskInstructions += `4. The user has asked this specific question: "${userQuestion}". Answer this.\n`;
   }
 
   if (imageFile) {
-      taskInstructions += `
-      5. Analyze the provided image to support your answer.
-      6. If a question was asked (via text or audio), answer it *specifically* using visual evidence from the image.
-      7. If NO question was asked and NO history exists, provide a general differential diagnosis and suggestions.
+    taskInstructions += `
+      5. What's in this image? Do you find anything wrong with it medically?
+      6. If you make a differential, suggest some remedies for them and also you can tell them the medicine name as well.
       `;
   } else {
-      taskInstructions += `
+    taskInstructions += `
       5. Answer the medical question provided in the text or audio.
       `;
   }
 
   taskInstructions += `
   CRITICAL RULES:
-  - Populate 'analysis_english' with a single, cohesive, professional paragraph in English.
+  - Do NOT add any numbers or special characters in your response.
+  - Your response should be in one long paragraph in 'analysis_english'.
+  - Always answer as if you are answering to a real person.
+  - Do NOT say 'In the image I see' but say 'With what I see, I think you have ....'
+  - Do NOT respond as an AI model in markdown, your answer should mimic that of an actual doctor not an AI bot.
+  - Keep your answer concise (max 2 sentences). No preamble, start your answer right away please.
   - Populate 'analysis_localized' with the SAME content translated into ${language}.
   - If ${language} is English, you may leave 'analysis_localized' as null or empty string.
-  - Suggest potential differential diagnoses and standard remedies/medicines (generic names) if applicable.
-  - If the image is unclear, state: "I see [describe visual], but it is not clear enough for a confident assessment."
   - DO NOT return an empty analysis string.
   `;
 
@@ -142,19 +144,19 @@ export const analyzeMedicalInput = async (
   // Add Image Part
   if (imageFile) {
     try {
-        const imageBase64 = await compressImage(imageFile);
-        parts.push({
-            inlineData: {
-                mimeType: 'image/jpeg',
-                data: imageBase64
-            }
-        });
+      const imageBase64 = await compressImage(imageFile);
+      parts.push({
+        inlineData: {
+          mimeType: 'image/jpeg',
+          data: imageBase64
+        }
+      });
     } catch (e) {
-        console.error("Image compression failed", e);
-        throw new Error("Failed to process image.");
+      console.error("Image compression failed", e);
+      throw new Error("Failed to process image.");
     }
   }
-  
+
   if (parts.length === 0 && !userQuestion) {
     throw new Error("No input provided (audio, image, or text).");
   }
@@ -165,73 +167,73 @@ export const analyzeMedicalInput = async (
   try {
     // 45 second timeout for analysis
     const response = await withTimeout<GenerateContentResponse>(
-        ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: { parts },
-            config: {
-                systemInstruction: systemPrompt,
-                safetySettings: [
-                    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-                    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-                    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-                    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-                ],
-                responseMimeType: "application/json",
-            }
-        }),
-        45000, 
-        "Analysis request timed out. Please try a smaller image or shorter audio."
+      ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: { parts },
+        config: {
+          systemInstruction: systemPrompt,
+          safetySettings: [
+            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+          ],
+          responseMimeType: "application/json",
+        }
+      }),
+      45000,
+      "Analysis request timed out. Please try a smaller image or shorter audio."
     );
 
     const text = response.text;
     if (!text) {
-        throw new Error("Empty response from AI.");
+      throw new Error("Empty response from AI.");
     }
 
     try {
-        const cleanedText = cleanJSON(text);
-        const parsed = JSON.parse(cleanedText);
+      const cleanedText = cleanJSON(text);
+      const parsed = JSON.parse(cleanedText);
 
-        const result: AnalysisResult = {
-            transcription: "",
-            analysis: ""
-        };
+      const result: AnalysisResult = {
+        transcription: "",
+        analysis: ""
+      };
 
-        // Handle transcription
-        if (parsed.transcription) {
-            result.transcription = cleanTranscription(parsed.transcription);
-        }
-        if (!audioBlob) {
-            result.transcription = ""; // No audio means no transcription needed
-        }
+      // Handle transcription
+      if (parsed.transcription) {
+        result.transcription = cleanTranscription(parsed.transcription);
+      }
+      if (!audioBlob) {
+        result.transcription = ""; // No audio means no transcription needed
+      }
 
-        // Handle analysis
-        if (parsed.analysis_english) {
-             result.analysis = String(parsed.analysis_english).trim();
-        } else if (parsed.analysis) {
-             // Fallback if model uses old format
-             result.analysis = String(parsed.analysis).trim();
-        } else if (parsed.response) {
-             result.analysis = String(parsed.response).trim();
-        }
+      // Handle analysis
+      if (parsed.analysis_english) {
+        result.analysis = String(parsed.analysis_english).trim();
+      } else if (parsed.analysis) {
+        // Fallback if model uses old format
+        result.analysis = String(parsed.analysis).trim();
+      } else if (parsed.response) {
+        result.analysis = String(parsed.response).trim();
+      }
 
-        // Handle localization
-        if (parsed.analysis_localized && language !== 'English') {
-            result.localizedAnalysis = String(parsed.analysis_localized).trim();
-        }
+      // Handle localization
+      if (parsed.analysis_localized && language !== 'English') {
+        result.localizedAnalysis = String(parsed.analysis_localized).trim();
+      }
 
-        // Robust Fallback
-        if (!result.analysis || result.analysis.length < 5) {
-             result.analysis = "I processed your input but could not generate a specific diagnosis. Please try providing more context or a clearer image.";
-        }
-        
-        return result;
+      // Robust Fallback
+      if (!result.analysis || result.analysis.length < 5) {
+        result.analysis = "I processed your input but could not generate a specific diagnosis. Please try providing more context or a clearer image.";
+      }
+
+      return result;
     } catch (parseError) {
-        console.error("JSON Parse Error:", parseError, "Raw text:", text);
-        return {
-            transcription: "",
-            analysis: text 
-        };
+      console.error("JSON Parse Error:", parseError, "Raw text:", text);
+      return {
+        transcription: "",
+        analysis: text
+      };
     }
 
   } catch (error) {
@@ -242,7 +244,7 @@ export const analyzeMedicalInput = async (
 
 export const generateVoiceResponse = async (text: string): Promise<string> => {
   if (!API_KEY) throw new Error("API Key is missing.");
-  
+
   const textToSpeak = cleanTextForTTS(text);
   const safeText = textToSpeak.length > 2000 ? textToSpeak.substring(0, 2000) + "..." : textToSpeak;
 
@@ -262,12 +264,12 @@ export const generateVoiceResponse = async (text: string): Promise<string> => {
 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (!base64Audio) throw new Error("No audio data generated.");
-    
+
     const binaryString = atob(base64Audio);
     const len = binaryString.length;
     const bytes = new Uint8Array(len);
     for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      bytes[i] = binaryString.charCodeAt(i);
     }
 
     return addWavHeader(bytes, 24000, 1);
@@ -278,29 +280,29 @@ export const generateVoiceResponse = async (text: string): Promise<string> => {
 };
 
 function addWavHeader(samples: Uint8Array, sampleRate: number, numChannels: number): string {
-    const buffer = new ArrayBuffer(44 + samples.length);
-    const view = new DataView(buffer);
-    writeString(view, 0, 'RIFF');
-    view.setUint32(4, 36 + samples.length, true);
-    writeString(view, 8, 'WAVE');
-    writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numChannels * 2, true);
-    view.setUint16(32, numChannels * 2, true);
-    view.setUint16(34, 16, true);
-    writeString(view, 36, 'data');
-    view.setUint32(40, samples.length, true);
-    const dataView = new Uint8Array(buffer, 44);
-    dataView.set(samples);
-    const blob = new Blob([buffer], { type: 'audio/wav' });
-    return URL.createObjectURL(blob);
+  const buffer = new ArrayBuffer(44 + samples.length);
+  const view = new DataView(buffer);
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + samples.length, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
+  view.setUint16(34, 16, true);
+  writeString(view, 36, 'data');
+  view.setUint32(40, samples.length, true);
+  const dataView = new Uint8Array(buffer, 44);
+  dataView.set(samples);
+  const blob = new Blob([buffer], { type: 'audio/wav' });
+  return URL.createObjectURL(blob);
 }
 
 function writeString(view: DataView, offset: number, string: string) {
-    for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-    }
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
 }
