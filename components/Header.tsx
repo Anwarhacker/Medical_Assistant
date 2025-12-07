@@ -20,10 +20,6 @@ export const Header: React.FC<{ toggleTheme: () => void, isDark: boolean }> = ({
             {isDark ? 'light_mode' : 'dark_mode'}
           </span>
         </button>
-        <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-          <span className="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
-        </button>
-        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-slate-200 dark:border-slate-700" data-alt="User profile picture" style={{backgroundImage: 'url("https://picsum.photos/200/200")'}}></div>
       </div>
     </header>
   );

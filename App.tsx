@@ -23,12 +23,8 @@ function App() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [voiceResponseUrl, setVoiceResponseUrl] = useState<string | null>(null);
 
-  // Theme Toggling
-  useEffect(() => {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDark(true);
-    }
-  }, []);
+  // Theme is set to light by default (isDark = false)
+  // User can toggle manually using the theme toggle button
 
   useEffect(() => {
     if (isDark) {
@@ -164,7 +160,7 @@ function App() {
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
-      <Header toggleTheme={toggleTheme} isDark={isDark} />
+      <Header toggleTheme={toggleTheme} isDark={!isDark} />
       
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 lg:px-8 py-8">
         <div className="flex flex-col gap-4">
