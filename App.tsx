@@ -199,16 +199,16 @@ function App() {
             
             {/* Status indicators and Clear Button */}
             <div className="flex flex-col gap-4">
-                <div className="text-xs text-blue-100 dark:text-slate-400 flex flex-col gap-1 p-3 rounded-lg border border-blue-300/30 dark:border-slate-700 bg-blue-500/5 dark:bg-slate-800/50">
+                <div className="text-xs text-black dark:text-slate-400 flex flex-col gap-1 p-3 rounded-lg border border-blue-300/30 dark:border-slate-700 bg-blue-500/5 dark:bg-slate-800/50">
                    <div className="flex justify-between items-center">
                      <span className="font-medium">Audio Input:</span>
-                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${audioBlob ? "bg-green-500/20 text-green-200" : "bg-slate-500/20 text-slate-400"}`}>
+                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${audioBlob ? "bg-green-500/20 text-white" : "bg-slate-500/20 text-slate-400"}`}>
                         {audioBlob ? "Recorded" : "None"}
                      </span>
                    </div>
                    <div className="flex justify-between items-center mt-1">
                      <span className="font-medium">Image Input:</span>
-                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${imageFile ? "bg-green-500/20 text-green-200" : "bg-slate-500/20 text-slate-400"}`}>
+                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${imageFile ? "bg-green-500/20 text-white" : "bg-slate-500/20 text-slate-400"}`}>
                         {imageFile ? "Uploaded" : "None"}
                      </span>
                    </div>
@@ -217,7 +217,7 @@ function App() {
                 <button 
                     onClick={handleClearAll}
                     disabled={!audioBlob && !imageFile && !questionText && !result}
-                    className="w-full py-3 px-4 bg-white/10 hover:bg-red-500/20 text-white border border-white/20 hover:border-red-500/50 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="w-full py-3 px-4 bg-red-500 text-white border border-white/20 hover:border-red-500/50 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
                     <span className="material-symbols-outlined group-hover:text-red-400 transition-colors">restart_alt</span>
                     <span className="group-hover:text-red-100 transition-colors">Start New Session</span>
@@ -248,7 +248,7 @@ function App() {
         </div>
 
         <footer className="mt-12 py-6 border-t border-blue-400 dark:border-slate-800 text-center">
-          <p className="text-xs text-blue-100 dark:text-slate-500 max-w-2xl mx-auto">
+          <p className="text-xs text-black dark:text-slate-500 max-w-2xl mx-auto">
             Disclaimer: This AI Medical Assistant provides information for educational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
           </p>
         </footer>

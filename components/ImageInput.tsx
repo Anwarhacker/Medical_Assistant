@@ -58,7 +58,7 @@ export const ImageInput: React.FC<ImageInputProps> = ({ onImageSelected, selecte
   };
 
   return (
-    <div className="flex flex-col items-stretch justify-start rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.05)] bg-white dark:bg-slate-900/70 p-6 transition-colors duration-200">
+    <div className="flex flex-col items-stretch justify-start rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.05)] bg-white dark:bg-slate-900 p-6 transition-colors duration-200">
       <p className="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] mb-1">Image Input</p>
       <p className="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal mb-4">Upload an image for analysis.</p>
       

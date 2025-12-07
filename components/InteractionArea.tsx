@@ -52,7 +52,7 @@ export const InteractionArea: React.FC<InteractionAreaProps> = ({
       </div>
 
       {/* AI Response Card - English (Always visible) */}
-      <div className="flex flex-col items-stretch justify-start rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.05)] bg-white dark:bg-slate-900/70 p-6 flex-grow transition-colors duration-200 min-h-[200px]">
+      <div className="flex flex-col items-stretch justify-start rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.05)] bg-white dark:bg-slate-900/70 p-6 flex-grow transition-colors duration-200 min-h-[120px]">
         <div className="flex justify-between items-center mb-3">
           <p className="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Doctor's Response (English)</p>
           <button 

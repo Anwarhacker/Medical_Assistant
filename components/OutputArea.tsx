@@ -139,7 +139,7 @@ export const OutputArea: React.FC<OutputAreaProps> = ({
       <button
         onClick={onAnalyze}
         disabled={!canAnalyze || isAnalyzing}
-        className="w-full h-14 rounded-xl bg-primary text-white hover:bg-blue-600 disabled:bg-blue-200 dark:disabled:bg-slate-700 disabled:text-blue-300 dark:disabled:text-slate-500 disabled:cursor-not-allowed font-bold text-lg shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
+        className="w-full h-14 rounded-xl bg-[#2563EB] text-white hover:bg-blue-600 disabled:bg-[#2B8CEE] dark:disabled:bg-[#2B8CEE] disabled:text-white dark:disabled:text-white disabled:cursor-not-allowed font-bold text-lg shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
       >
         {isAnalyzing ? (
             <>
